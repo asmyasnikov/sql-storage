@@ -1,29 +1,29 @@
-package memstorage
+package kambodja
 
 import (
 	"database/sql"
 	"database/sql/driver"
-	"github.com/asmyasnikov/sql-storage/internal/xsql"
 
+	"github.com/asmyasnikov/sql-storage/internal"
 	"github.com/asmyasnikov/sql-storage/internal/storage"
 )
 
-type memtable interface {
+type storageInterface interface {
 	Get(key string) (value string, err error)
 	Set(key, value string) (err error)
-	Keys() (keys []string, err error)
+	Keys() ([]string, error)
 }
 
-type azazaDriver struct {
-	memtable memtable
+type kambodja struct {
+	storage storageInterface
 }
 
-func (a azazaDriver) Open(_ string) (driver.Conn, error) {
-	return xsql.New(a.memtable), nil
+func (k kambodja) Open(name string) (driver.Conn, error) {
+	return internal.Conn(k.storage), nil
 }
 
 func init() {
-	sql.Register("azaza", &azazaDriver{
-		memtable: storage.New(),
+	sql.Register("kambodja", kambodja{
+		storage: storage.New(),
 	})
 }
